@@ -1,7 +1,10 @@
 from django.db import models
-
+from django.contrib.auth import get_user_model
 
 from .validators import validate_year
+
+# Добавить свою модель
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -53,15 +56,49 @@ class Title(models.Model):
         verbose_name='Жанр',
         related_name='titles'
     )
-    name = models.CharField(max_length=256, verbose_name="Название произведения")
-    year = models.IntegerField(verbose_name="Дата выхода", validators=[validate_year])
-    description = models.TextField(verbose_name="Описание", null=True, blank=True)
+    name = models.CharField(
+        max_length=256,
+        verbose_name="Название произведения")
+    year = models.IntegerField(
+        verbose_name="Дата выхода",
+        validators=[validate_year])
+    description = models.TextField(
+        verbose_name="Описание",
+        null=True,
+        blank=True)
 
     def __str__(self):
         return self.name
 
-
     class Meta:
         ordering = ['name']
         verbose_name = 'Произведение'
-        verbose_name_plural ='Произведения'
+        verbose_name_plural = 'Произведения'
+
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(verbose_name="Текст отзыва")
+    score = models.SmallIntegerField(default=1, verbose_name="Оценка")
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата публикации отзыва")
+
+    class Meta:
+        unique_together = ('title', 'author')
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(verbose_name="Текст отзыва")
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата публикации отзыва")
