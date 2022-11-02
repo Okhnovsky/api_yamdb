@@ -53,15 +53,24 @@ class Title(models.Model):
         verbose_name='Жанр',
         related_name='titles'
     )
-    name = models.CharField(max_length=256, verbose_name="Название произведения")
-    year = models.IntegerField(verbose_name="Дата выхода", validators=[validate_year])
-    description = models.TextField(verbose_name="Описание", null=True, blank=True)
+    name = models.CharField(
+        max_length=256,
+        verbose_name="Название произведения"
+    )
+    year = models.IntegerField(
+        verbose_name="Дата выхода",
+        validators=[validate_year]
+    )
+    description = models.TextField(
+        verbose_name="Описание",
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.name
 
-
     class Meta:
         ordering = ['name']
         verbose_name = 'Произведение'
-        verbose_name_plural ='Произведения'
+        verbose_name_plural = 'Произведения'
