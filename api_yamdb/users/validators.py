@@ -14,6 +14,5 @@ class UserameValidation:
             )
         elif username == 'me':
             raise ValidationError(
-                'Нельзя использовать имя пользователя "me"'
-            )
+                'Нельзя использовать имя пользователя "me"')
         return username
