@@ -18,7 +18,7 @@ class User(AbstractUser):
     """Кастомная модель пользователя."""
     username = models.CharField(
         'Имя пользователя',
-        validators = UserameValidation,
+        validators=UserameValidation,
         max_length=150,
         unique=True,
         blank=False,
@@ -56,7 +56,3 @@ class User(AbstractUser):
         null=True,
         blank=False
     )
-
-
-
-# Create your models here.
