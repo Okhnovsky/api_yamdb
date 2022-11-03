@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from django.core.mail import EmailMessage
+from django.db import IntegrityError
+from rest_framework.serializers import ValidationError
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -9,6 +10,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
+from .generator import get_confirmation_code, send_confirmation_code
 from .permissions import OwnerOrAdmin
 from .serializers import SignUpSerializer, GenTokenSerializer, UserSerializer
 from users.models import User
@@ -20,30 +22,25 @@ class APISignUp(APIView):
     переданный email.
     """
 
-    @staticmethod
-    def send_email(data):
-        email = EmailMessage(
-            subject=data['email_subject'],
-            body=data['email_body'],
-            to=[data['to_email']]
-        )
-        email.send()
-
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        email_body = (
-            f'Добро пожаловать, {user.username}!'
-            f'Ваш код доступа: {user.confirmation_code}'
-        )
-        data = {
-            'email_subject': 'Код доступа',
-            'email_body': email_body,
-            'to_email': user.email,
-        }
-        self.send_email(data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
+        try:
+            user = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except IntegrityError as error:
+            raise ValidationError(
+                ('Ошибка при попытке создать новую запись '
+                 f'в базе с username={username}, email={email}')
+            ) from error
+        user.confirmation_code = str(get_confirmation_code())
+        user.save()
+        send_confirmation_code(user)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class APIGenToken(APIView):

@@ -131,9 +131,12 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = 'users.User'
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'yamdba@gmail.com'
-EMAIL_HOST_PASSWORD = 'api_yamdb5'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'yamdba@gmail.com'
+# EMAIL_HOST_PASSWORD = 'api_yamdb5'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
