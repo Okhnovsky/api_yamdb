@@ -8,6 +8,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'username')
 
+
 class GenTokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True)
@@ -19,4 +20,14 @@ class GenTokenSerializer(serializers.ModelSerializer):
         fields = (
             'username',
             'confirmation_code'
+        )
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'rile',
         )
