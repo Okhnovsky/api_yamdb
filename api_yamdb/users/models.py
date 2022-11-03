@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from .validators import UserameValidation
+from .validators import validate_username
 
 
 USER = 'user'
@@ -16,9 +16,10 @@ ROLE_CHOICES = [
 
 class User(AbstractUser):
     """Кастомная модель пользователя."""
+
     username = models.CharField(
         'Имя пользователя',
-        validators=UserameValidation,
+        validators=(validate_username,),
         max_length=150,
         unique=True,
         blank=False,
@@ -47,12 +48,14 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Роль',
+        max_length=20,
         choices=ROLE_CHOICES,
         default=USER,
         blank=True
     )
     confirmation_code = models.CharField(
         'Код подтверждения',
+        max_length=255,
         null=True,
         blank=False
     )
