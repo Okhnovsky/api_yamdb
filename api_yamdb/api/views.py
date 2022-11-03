@@ -28,7 +28,7 @@ class APISignUp(APIView):
         username = serializer.validated_data.get('username')
         email = serializer.validated_data.get('email')
         try:
-            user = User.objects.get_or_create(
+            user, _ = User.objects.get_or_create(
                 username=username,
                 email=email
             )
@@ -77,7 +77,7 @@ class UserViewSet(ModelViewSet):
     search_fields = ('username',)
 
     @action(
-        methods=['GET', 'PATH'],
+        methods=['GET', 'PATCH'],
         detail=False,
         permission_classes=(IsAuthenticated,),
         url_path='me'

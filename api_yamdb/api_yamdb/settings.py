@@ -134,6 +134,10 @@ AUTH_USER_MODEL = 'users.User'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
+CONF_MIN = 100000
+CONF_MAX = 999999
+FROM_EMAIL = 'YamDB@mail.com'
+
 # EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_HOST_USER = 'yamdba@gmail.com'
 # EMAIL_HOST_PASSWORD = 'api_yamdb5'
