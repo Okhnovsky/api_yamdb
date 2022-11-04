@@ -1,10 +1,7 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from users.models import User
 
 from .validators import validate_year
-
-# Добавить свою модель
-User = get_user_model()
 
 
 class Category(models.Model):

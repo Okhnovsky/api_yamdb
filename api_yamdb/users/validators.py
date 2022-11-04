@@ -2,17 +2,14 @@ import re
 from django.core.exceptions import ValidationError
 
 
-class UserameValidation:
-    """Валидация username."""
-    def validate_username(self, username):
-        pattern = re.compile(r'^[\w.@+-]+\z')
-        if pattern.fullmatch(username) is None:
-            match = re.split(pattern, username)
-            symbol = ''.join(match)
-            raise ValidationError(
-                f'Нелья использовать символы {symbol}'
-            )
-        elif username == 'me':
-            raise ValidationError(
-                'Нельзя использовать имя пользователя "me"')
-        return username
+def validate_username(value):
+    if value == 'me':
+        raise ValidationError(
+            ('Имя пользователя не может быть <me>.'),
+            params={'value': value},
+        )
+    if re.search(r'^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$', value) is None:
+        raise ValidationError(
+            (f'Не допустимые символы <{value}> в нике.'),
+            params={'value': value},
+        )
