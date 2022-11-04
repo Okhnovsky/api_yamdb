@@ -24,6 +24,8 @@ class GenTokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
 
     class Meta:
         model = User
