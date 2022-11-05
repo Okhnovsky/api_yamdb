@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from rest_framework.serializers import ValidationError
 from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -9,10 +10,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework.filters import SearchFilter
 from .generator import get_confirmation_code, send_confirmation_code
 from .permissions import OwnerOrAdmin, IsAdminOrReadOnly
-from reviews.models import Category, Genre, Title
 from .mixins import CreateDeleteListViewSet
 from .serializers import (
     SignUpSerializer,
@@ -23,10 +25,9 @@ from .serializers import (
     TitleSerializer
 )
 
+
 from users.models import User
-from rest_framework import viewsets
-from rest_framework import filters
-from django_filters.rest_framework import DjangoFilterBackend
+from reviews.models import Category, Genre, Title
 
 
 class APISignUp(APIView):
