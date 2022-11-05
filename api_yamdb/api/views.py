@@ -11,9 +11,22 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from .generator import get_confirmation_code, send_confirmation_code
-from .permissions import OwnerOrAdmin
-from .serializers import SignUpSerializer, GenTokenSerializer, UserSerializer
+from .permissions import OwnerOrAdmin, IsAdminOrReadOnly
+from reviews.models import Category, Genre, Title
+from .mixins import CreateDeleteListViewSet
+from .serializers import (
+    SignUpSerializer,
+    GenTokenSerializer,
+    UserSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    TitleSerializer
+)
+
 from users.models import User
+from rest_framework import viewsets
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class APISignUp(APIView):
@@ -92,3 +105,27 @@ class UserViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CategoryViewSet(CreateDeleteListViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class GenreViewSet(CreateDeleteListViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
