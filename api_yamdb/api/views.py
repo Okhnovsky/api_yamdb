@@ -112,6 +112,7 @@ class CategoryViewSet(CreateDeleteListViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
 
@@ -120,6 +121,7 @@ class GenreViewSet(CreateDeleteListViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
 
