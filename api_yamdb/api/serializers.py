@@ -55,18 +55,18 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
-        slug_field="slug",
+        slug_field='slug',
         queryset=Category.objects.all()
     )
     genre = serializers.SlugRelatedField(
-        slug_field="slug",
+        slug_field='slug',
         many=True,
         queryset=Genre.objects.all()
     )
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'category', 'genre', 'year', 'description')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
     def validate_year(self, value):
         year = date.today().year
@@ -74,3 +74,19 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Проверьте дату выхода произведения')
         return value
+
+
+class ReadOnlyTitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category',
+        )

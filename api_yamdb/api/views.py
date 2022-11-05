@@ -15,6 +15,7 @@ from rest_framework import filters
 from rest_framework.filters import SearchFilter
 from .generator import get_confirmation_code, send_confirmation_code
 from .permissions import OwnerOrAdmin, IsAdminOrReadOnly
+from .filters import TitlesFilter
 from .mixins import CreateDeleteListViewSet
 from .serializers import (
     SignUpSerializer,
@@ -22,7 +23,8 @@ from .serializers import (
     UserSerializer,
     CategorySerializer,
     GenreSerializer,
-    TitleSerializer
+    TitleSerializer,
+    ReadOnlyTitleSerializer,
 )
 
 
@@ -131,4 +133,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+    filterset_class = TitlesFilter
+
+    def get_serializer_class(self):
+        if self.action in ("retrieve", "list"):
+            return ReadOnlyTitleSerializer
+        return TitleSerializer
