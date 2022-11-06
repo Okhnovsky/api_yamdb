@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from datetime import date
 from users.models import User
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -90,3 +90,19 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
             'genre',
             'category',
         )
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ('__all__')
+        read_only_fields = ('review', 'author')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ('__all__')
+        read_only_fields = ('review', 'author')
