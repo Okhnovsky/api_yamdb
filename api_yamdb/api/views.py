@@ -14,7 +14,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.filters import SearchFilter
 from .generator import get_confirmation_code, send_confirmation_code
-from .permissions import OwnerOrAdmin, IsAdminOrReadOnly
+from .permissions import (
+    OwnerOrAdmin,
+    IsAdminOrReadOnly,
+    IsAuthorOrModeratorOrAdminOrReadOnly)
 from .filters import TitlesFilter
 from .mixins import CreateDeleteListViewSet
 from .serializers import (
@@ -26,11 +29,13 @@ from .serializers import (
     GenreSerializer,
     TitleSerializer,
     ReadOnlyTitleSerializer,
+    ReviewSerializer,
+    CommentSerializer,
 )
 
 
 from users.models import User
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 
 
 class APISignUp(APIView):
@@ -147,3 +152,35 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ("retrieve", "list"):
             return ReadOnlyTitleSerializer
         return TitleSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        serializer.save(
+            title=title,
+            author=self.request.user,
+        )
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly,)
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        serializer.save(
+            review=review,
+            author=self.request.user,
+        )
