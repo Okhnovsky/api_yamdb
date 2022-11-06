@@ -91,16 +91,23 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
             'category',
         )
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Review
         fields = ('__all__')
         read_only_fields = ('review', 'author')
+        
+    def validate_score(self, value):
+        if 0 < value < 11:
+            return value
+        raise serializers.ValidationError(
+            'Оценка от 1 до 10'
+        )
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Comment
