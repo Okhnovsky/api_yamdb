@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.db import IntegrityError
+from sqlite3 import IntegrityError
 from rest_framework.serializers import ValidationError
 from rest_framework import status
 from rest_framework import viewsets
@@ -21,6 +21,7 @@ from .serializers import (
     SignUpSerializer,
     GenTokenSerializer,
     UserSerializer,
+    NoAccessSerializer,
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
@@ -48,11 +49,11 @@ class APISignUp(APIView):
                 username=username,
                 email=email
             )
-        except IntegrityError as error:
+        except IntegrityError:
             raise ValidationError(
                 ('Ошибка при попытке создать новую запись '
                  f'в базе с username={username}, email={email}')
-            ) from error
+            )
         user.confirmation_code = str(get_confirmation_code())
         user.save()
         send_confirmation_code(user)
@@ -99,15 +100,22 @@ class UserViewSet(ModelViewSet):
         url_path='me'
     )
     def get_user_information(self, request):
-        user = get_object_or_404(User, username=self.request.user)
-        if request.method == 'GET':
-            serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
-            serializer = UserSerializer(user, data=request.data)
+            if request.user.is_admin:
+                serializer = UserSerializer(
+                    request.user,
+                    data=request.data,
+                    partial=True)
+            else:
+                serializer = NoAccessSerializer(
+                    request.user,
+                    data=request.data,
+                    partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
 
 class CategoryViewSet(CreateDeleteListViewSet):
