@@ -14,7 +14,6 @@ class GenreAdmin(admin.ModelAdmin):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = ('category', 'name', 'year', 'description')
-    # filter_horizontal = ['genres']
 
 
 admin.site.register(Category, CategoryAdmin)
