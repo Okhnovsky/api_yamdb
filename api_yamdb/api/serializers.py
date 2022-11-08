@@ -64,6 +64,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(
+        default=0,
         read_only=True
     )
     category = serializers.SlugRelatedField(
@@ -78,7 +79,14 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category')
 
     def validate_year(self, value):
         year = date.today().year
