@@ -3,6 +3,8 @@ from users.models import User
 
 from .validators import validate_year
 
+LIMIT_TEXT = 15
+
 
 class Category(models.Model):
     """Category type of work"""
@@ -86,7 +88,11 @@ class Review(models.Model):
         verbose_name="Дата публикации отзыва")
 
     class Meta:
+        ordering = ['-pub_date']
         unique_together = ('title', 'author')
+
+    def __str__(self):
+        return self.text[:LIMIT_TEXT]
 
 
 class Comment(models.Model):
@@ -99,3 +105,6 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата публикации отзыва")
+
+    def __str__(self):
+        return self.text[:LIMIT_TEXT]
