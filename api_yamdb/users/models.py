@@ -1,17 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from .enumerates import ROLE_CHOICES
 from .validators import validate_username
-
-
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR)
-]
 
 
 class User(AbstractUser):
@@ -50,7 +40,7 @@ class User(AbstractUser):
         'Роль',
         max_length=20,
         choices=ROLE_CHOICES,
-        default=USER,
+        default='user',
         blank=True
     )
     confirmation_code = models.CharField(
@@ -62,15 +52,16 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == USER
+        return self.role == 'user'
 
     @property
     def is_admin(self):
-        return self.role == ADMIN or self.is_superuser
+        return self.role == ('admin' or self.is_superuser
+                             or self.is_staff)
 
     @property
     def is_moderator(self):
-        return self.role == MODERATOR
+        return self.role == 'moderator'
 
     def __str__(self):
         return self.username
