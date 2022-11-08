@@ -106,5 +106,8 @@ class Comment(models.Model):
         auto_now_add=True,
         verbose_name="Дата публикации отзыва")
 
+    class Meta:
+        ordering = ['-pub_date']
+
     def __str__(self):
         return self.text[:LIMIT_TEXT]
