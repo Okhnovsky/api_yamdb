@@ -13,13 +13,13 @@ class Category(models.Model):
         verbose_name="Слаг категории"
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ['name']
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
+
+    def __str__(self):
+        return self.name
 
 
 class Genre(models.Model):
@@ -31,13 +31,13 @@ class Genre(models.Model):
         verbose_name="Слаг жанра"
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ['name']
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
@@ -58,19 +58,20 @@ class Title(models.Model):
         verbose_name="Название произведения")
     year = models.IntegerField(
         verbose_name="Дата выхода",
-        validators=[validate_year])
+        validators=[validate_year],
+        db_index=True)
     description = models.TextField(
         verbose_name="Описание",
         null=True,
         blank=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ['name']
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
