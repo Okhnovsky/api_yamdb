@@ -64,7 +64,6 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(
-        default=0,
         read_only=True
     )
     category = serializers.SlugRelatedField(

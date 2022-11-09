@@ -12,7 +12,6 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
-from django.db.models.functions import Coalesce
 from rest_framework import filters
 from rest_framework.filters import SearchFilter
 from .permissions import (
@@ -164,8 +163,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         'category'
     ).prefetch_related(
         'genre'
-    ).annotate(rating=Coalesce(Avg('reviews__score'), 0))
-    serializer_class = TitleSerializer
+    ).annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter

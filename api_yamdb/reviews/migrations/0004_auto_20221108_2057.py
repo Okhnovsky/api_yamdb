@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveConstraint(
             model_name='review',
-            name='unique review',
+            name='review',
         ),
         migrations.AlterField(
             model_name='review',
