@@ -12,7 +12,8 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name="Слаг категории"
+        verbose_name="Слаг категории",
+        db_index=True
     )
 
     class Meta:
@@ -30,7 +31,8 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name="Слаг жанра"
+        verbose_name="Слаг жанра",
+        db_index=True
     )
 
     class Meta:
@@ -57,7 +59,8 @@ class Title(models.Model):
     )
     name = models.CharField(
         max_length=256,
-        verbose_name="Название произведения")
+        verbose_name="Название произведения",
+        db_index=True)
     year = models.IntegerField(
         verbose_name="Дата выхода",
         validators=[validate_year],
@@ -86,7 +89,8 @@ class Review(models.Model):
     score = models.SmallIntegerField(default=1, verbose_name="Оценка")
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Дата публикации отзыва")
+        verbose_name="Дата публикации отзыва",
+        db_index=True)
 
     class Meta:
         ordering = ['-pub_date']
@@ -105,7 +109,8 @@ class Comment(models.Model):
     text = models.TextField(verbose_name="Текст отзыва")
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Дата публикации отзыва")
+        verbose_name="Дата публикации отзыва",
+        db_index=True)
 
     class Meta:
         ordering = ['-pub_date']

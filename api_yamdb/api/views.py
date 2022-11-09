@@ -1,21 +1,20 @@
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from sqlite3 import IntegrityError
-from rest_framework.serializers import ValidationError
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
 from django.db.models.functions import Coalesce
 from rest_framework import filters
 from rest_framework.filters import SearchFilter
-from .generator import get_confirmation_code, send_confirmation_code
 from .permissions import (
     OwnerOrAdmin,
     IsAdminOrReadOnly,
@@ -40,51 +39,68 @@ from users.models import User
 from reviews.models import Category, Genre, Title, Review
 
 
-class APISignUp(APIView):
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup(request):
     """
     Получение кода подтверждения на заранее
     переданный email.
     """
-
-    def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        email = serializer.validated_data.get('email')
-        try:
-            user, _ = User.objects.get_or_create(
-                username=username,
-                email=email
-            )
-        except IntegrityError:
-            raise ValidationError(
-                ('Ошибка при попытке создать новую запись '
-                 f'в базе с username={username}, email={email}')
-            )
-        user.confirmation_code = str(get_confirmation_code())
-        user.save()
+    serializer = SignUpSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
         send_confirmation_code(user)
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class APIGenToken(APIView):
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_token(request):
     """
     Получение JWT токена
     """
+    serializer = GenTokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data['username']
+    confirmation_code = serializer.validated_data['confirmation_code']
+    user = get_object_or_404(User, username=username)
+    if not default_token_generator.check_token(user, confirmation_code):
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    token = str(AccessToken.for_user(user))
+    return Response({'token': token}, status=status.HTTP_201_CREATED)
 
-    def post(self, request):
-        serializer = GenTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['username']
-        confirmation_code = serializer.validated_data['confirmation_code']
-        user = get_object_or_404(User, username=username)
-        if confirmation_code == user.confirmation_code:
-            token = str(AccessToken.for_user(user))
-            return Response({'token': token}, status=status.HTTP_201_CREATED)
-        return Response(
-            {'confirmation_code': 'Неверный код подтверждения'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def refresh_code(request):
+    """
+    Повторная отправка кода подтверждения.
+    """
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        username = serializer.data['username']
+        email = serializer.data['email']
+        user = get_object_or_404(User, username=username, email=email)
+        send_confirmation_code(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def send_confirmation_code(user):
+    """
+    Функция отпарвки кода подтверждения.
+    """
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        subject='Код подтверждения.',
+        message=(
+            f'Добро пожаловать, {user.username}! '
+            f'Ваш код подтверждения {confirmation_code}'
+        ),
+        from_email=settings.FROM_EMAIL,
+        recipient_list=[user.email]
+    )
 
 
 class UserViewSet(ModelViewSet):
